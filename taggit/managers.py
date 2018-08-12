@@ -24,16 +24,17 @@ from taggit.utils import require_instance_manager
 
 
 class TaggableRel(ManyToManyRel):
-    def __init__(self, field, related_name, through, to=None):
-        self.model = to
-        self.related_name = related_name
-        self.related_query_name = None
-        self.limit_choices_to = {}
-        self.symmetrical = True
-        self.multiple = True
-        self.through = through
-        self.field = field
-        self.through_fields = None
+    def __init__(self, field, to=None, related_name=None, related_query_name=None,
+                 limit_choices_to=None, symmetrical=True, through=None,
+                 through_fields=None, db_constraint=True):
+        super(TaggableRel, self).__init__(
+            field, to=to,
+            related_name=related_name,
+            related_query_name=related_query_name,
+            limit_choices_to=limit_choices_to,
+            symmetrical=symmetrical, through=through,
+            through_fields=through_fields, db_constraint=db_constraint
+        )
 
     def get_joining_columns(self):
         return self.field.get_reverse_joining_columns()
@@ -376,7 +377,7 @@ class TaggableManager(RelatedField, Field):
         self.swappable = False
         self.manager = manager
 
-        rel = TaggableRel(self, related_name, self.through, to=to)
+        rel = TaggableRel(field=self, related_name=related_name, through=self.through, to=to)
 
         Field.__init__(
             self,
